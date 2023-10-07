@@ -4,6 +4,8 @@ Uses chat active/no longer active messaging to alert you when you leave your Poc
 
 ## Installation
 
+![Whats In Your Pocket?](./wiyp-1.png) ![Whats In Your Pocket?](./wiyp-2.png)
+
 To install WIYP? copy & paste this link into your browser:
 alt1://addapp/https://nadyanayme.github.io/WhatsInYourPocket/dist/appconfig.json
 
