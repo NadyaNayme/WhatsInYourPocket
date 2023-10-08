@@ -79,20 +79,21 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  margin-bottom: .5rem;
 }
 
 #Settings .setting {
   margin-bottom: .65rem;
 }
 
+input[type="color"],
 input[type="checkbox"] {
   margin-right: .5rem;
 }
 
 input[type="number"] {
-  margin: 0 .5rem;
+  margin: 0 .5rem 0 0;
   max-width: 40px;
-  margin-left: auto;
 }
 
 input[type="number"].per-row {
@@ -22262,7 +22263,6 @@ var getMob = function () {
         mobReader.read();
         if (mobReader.state === null) {
             updateSetting('inCombat', false);
-            window.setTimeout(getMob, 300);
         }
         else {
             updateSetting('inCombat', true);
@@ -22291,8 +22291,9 @@ function startWiyp() {
         return;
     }
     setInterval(readChatbox, 200);
-    setInterval(getChat, 100);
-    setInterval(getMob, 100);
+    setInterval(getChat, 300);
+    setInterval(getMob, 300);
+    setInterval(updateOverlay, 100);
 }
 function readChatbox() {
     return __awaiter(this, void 0, void 0, function () {
@@ -22325,7 +22326,6 @@ function readChatbox() {
                     }
                 });
             }
-            updateOverlay();
             return [2 /*return*/];
         });
     });
@@ -22340,7 +22340,7 @@ function updateLocation(e) {
 }
 function updateOverlay() {
     return __awaiter(this, void 0, void 0, function () {
-        var overlayPosition, pocketItem, pocketState, inCombat;
+        var overlayPosition, pocketItem, pocketState, inCombat, fontSize, fontColor, r, g, b;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -22348,14 +22348,19 @@ function updateOverlay() {
                     pocketItem = getSetting('pocketItem');
                     pocketState = getSetting('pocketState');
                     inCombat = getSetting('inCombat');
+                    fontSize = parseInt(getSetting('fontSize'), 10);
+                    fontColor = getSetting('fontColor');
+                    r = fontColor[0];
+                    g = fontColor[1];
+                    b = fontColor[2];
                     alt1.overLaySetGroup('wiyp');
                     alt1.overLayFreezeGroup('wiyp');
                     alt1.overLayClearGroup('wiyp');
                     if (getSetting('pocketItem') == '') {
-                        alt1.overLayText("Toggle pocket item on/off to begin tracking...", alt1__WEBPACK_IMPORTED_MODULE_6__.mixColor(255, 255, 255), 24, overlayPosition.x, overlayPosition.y, 125);
+                        alt1.overLayText("Toggle pocket item on/off to begin tracking...", alt1__WEBPACK_IMPORTED_MODULE_6__.mixColor(255, 255, 255), fontSize, overlayPosition.x, overlayPosition.y, 125);
                     }
                     else if ((pocketState && !inCombat) || !pocketState && inCombat) {
-                        alt1.overLayText("".concat(pocketItem ? pocketItem : '???', " is ").concat(pocketState ? 'active' : 'inactive', " ").concat(inCombat ? 'while in combat' : 'while out of combat'), alt1__WEBPACK_IMPORTED_MODULE_6__.mixColor(255, 0, 0), 24, overlayPosition.x, overlayPosition.y, 300);
+                        alt1.overLayText("".concat(pocketItem ? pocketItem : '???', " is ").concat(pocketState ? 'active' : 'inactive', " ").concat(inCombat ? 'while in combat' : 'while out of combat'), alt1__WEBPACK_IMPORTED_MODULE_6__.mixColor(r, g, b), fontSize, overlayPosition.x, overlayPosition.y, 300);
                     }
                     alt1.overLayRefreshGroup('wiyp');
                     return [4 /*yield*/, new Promise(function (done) { return setTimeout(done, 300); })];
@@ -22374,6 +22379,8 @@ function initSettings() {
 }
 function setDefaultSettings() {
     localStorage.setItem('wiyp', JSON.stringify({
+        fontColor: [255, 0, 0],
+        fontSize: 24,
         inCombat: false,
         overlayPosition: { x: 100, y: 100 },
         pocketItem: '',
@@ -22410,6 +22417,29 @@ function setOverlayPosition() {
         });
     });
 }
+var colorFields = document.getElementsByClassName('colors');
+for (var _i = 0, colorFields_1 = colorFields; _i < colorFields_1.length; _i++) {
+    var color = colorFields_1[_i];
+    color.addEventListener('input', function (e) {
+        updateSetting(e.target.dataset.setting, hexToRgb(e.target.value));
+    });
+}
+var fontSize = document.getElementsByClassName('size');
+for (var _a = 0, fontSize_1 = fontSize; _a < fontSize_1.length; _a++) {
+    var input = fontSize_1[_a];
+    input.addEventListener('input', function (e) {
+        updateSetting(e.target.dataset.setting, e.target.value);
+    });
+}
+// Stolen from Stack Overflow out of pure laziness
+// https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+var hexToRgb = function (hex) {
+    return hex
+        .replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, function (m, r, g, b) { return '#' + r + r + g + g + b + b; })
+        .substring(1)
+        .match(/.{2}/g)
+        .map(function (x) { return parseInt(x, 16); });
+};
 function getSetting(setting) {
     if (!localStorage.wiyp) {
         initSettings();

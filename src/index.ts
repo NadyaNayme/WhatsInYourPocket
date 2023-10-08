@@ -46,7 +46,6 @@ let getMob = () => {
 		mobReader.read();
 		if(mobReader.state === null) {
 			updateSetting('inCombat', false);
-			window.setTimeout(getMob, 300);
 		} else {
 			updateSetting('inCombat', true);
 		}
@@ -85,8 +84,9 @@ export function startWiyp() {
 		return;
 	}
 	setInterval(readChatbox, 200);
-	setInterval(getChat, 100);
-	setInterval(getMob, 100);
+	setInterval(getChat, 300);
+	setInterval(getMob, 300);
+	setInterval(updateOverlay, 100);
 }
 
 async function readChatbox() {
@@ -117,7 +117,6 @@ async function readChatbox() {
 			}
 		});
 	}
-	updateOverlay();
 }
 
 function updateLocation(e) {
@@ -138,6 +137,13 @@ async function updateOverlay() {
 	let pocketItem = getSetting('pocketItem');
 	let pocketState = getSetting('pocketState');
 	let inCombat = getSetting('inCombat');
+
+	let fontSize = parseInt(getSetting('fontSize'), 10);
+	let fontColor = getSetting('fontColor');
+	let r = fontColor[0];
+	let g = fontColor[1];
+	let b = fontColor[2];
+
 	alt1.overLaySetGroup('wiyp');
 	alt1.overLayFreezeGroup('wiyp');
 
@@ -147,7 +153,7 @@ async function updateOverlay() {
 		alt1.overLayText(
 			`Toggle pocket item on/off to begin tracking...`,
 			a1lib.mixColor(255, 255, 255),
-			24,
+			fontSize,
 			overlayPosition.x,
 			overlayPosition.y,
 			125
@@ -157,8 +163,8 @@ async function updateOverlay() {
 			`${pocketItem ? pocketItem : '???'} is ${
 				pocketState ? 'active' : 'inactive'
 			} ${inCombat ? 'while in combat' : 'while out of combat'}`,
-			a1lib.mixColor(255, 0, 0),
-			24,
+			a1lib.mixColor(r,g,b),
+			fontSize,
 			overlayPosition.x,
 			overlayPosition.y,
 			300
@@ -179,6 +185,8 @@ function setDefaultSettings() {
 	localStorage.setItem(
 		'wiyp',
 		JSON.stringify({
+			fontColor: [255, 0 ,0],
+			fontSize: 24,
 			inCombat: false,
 			overlayPosition: { x: 100, y: 100 },
 			pocketItem: '',
@@ -217,6 +225,33 @@ async function setOverlayPosition() {
 	}
 	alt1.clearTooltip();
 }
+
+var colorFields: any = document.getElementsByClassName('colors');
+for (let color of colorFields) {
+	color.addEventListener('input', (e) => {
+		updateSetting(e.target.dataset.setting, hexToRgb(e.target.value));
+	});
+}
+
+var fontSize: any = document.getElementsByClassName('size');
+for (let input of fontSize) {
+	input.addEventListener('input', (e) => {
+		updateSetting(e.target.dataset.setting, e.target.value);
+	});
+}
+
+// Stolen from Stack Overflow out of pure laziness
+// https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+const hexToRgb = (hex) =>
+	hex
+		.replace(
+			/^#?([a-f\d])([a-f\d])([a-f\d])$/i,
+			(m, r, g, b) => '#' + r + r + g + g + b + b
+		)
+		.substring(1)
+		.match(/.{2}/g)
+		.map((x) => parseInt(x, 16));
+
 
 function getSetting(setting) {
 	if (!localStorage.wiyp) {
