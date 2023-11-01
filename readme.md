@@ -26,3 +26,7 @@ If you encounter any other bugs - please submit an issue and I'll investigate it
 ## Known Issues
 
 - Grimoire/God Book/Scrimshaw messaging is only updated when a chat message is detected. If you have an active grimoire and swap to a god book when you lose your target it will say your grimoire is active while out of combat. I won't be fixing this.
+
+## My Other Plugins
+
+To see my other Alt1 plugins [click here](https://github.com/NadyaNayme/NyusPluginDirectory)
